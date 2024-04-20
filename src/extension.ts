@@ -11,7 +11,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		let tree = '<bold><span class="t-icon" name="icons">📦</span>' + path.basename(el.fsPath) + '</bold> <br>' + entryTrees(el.fsPath, 0);
         // 生成流程图
-        let graph = entryGraph(el.fsPath, 0);
+        let graph = entryMarkdown(el.fsPath, 0);
 
 		let tree_col = vscode.window.createWebviewPanel('text', 'Generate Tree and Graph Views',
 		{ viewColumn: vscode.ViewColumn.Active }, { enableScripts: true });
@@ -82,41 +82,40 @@ export function entryTrees (trgPath: string, deps: number) {
 }
 
 
-
-export function entryGraph(trgPath: string, deps: number, parent: string = '') {
-    let graphText = '';
+export function entryMarkdown(trgPath: string, deps: number = 0): string {
+    let markdownText: string = '';
     if (!fs.existsSync(trgPath)) { return ''; }
 
     // 获取目录和文件列表
-    let beforSortFiles: Array<object> = fs.readdirSync(trgPath);
-    let paths: Array<object> = [];
-    let tmpFiles: Array<object> = [];
+    let files: string[] = fs.readdirSync(trgPath);
+    let directories: string[] = [];
+    let tmpFiles: string[] = [];
 
     // 区分目录和文件
-    beforSortFiles.forEach(target => {
-        let fullPath = path.join(trgPath, target.toString());
+    files.forEach(file => {
+        let fullPath = path.join(trgPath, file);
         if (fs.statSync(fullPath).isDirectory()) {
-            paths.push(target);
+            directories.push(file);
         } else {
-            tmpFiles.push(target);
+            tmpFiles.push(file);
         }
     });
-    paths = paths.concat(tmpFiles);
 
-    // 生成Mermaid格式的流程图文本
-    paths.forEach(item => {
-        let fullPath = path.join(trgPath, item.toString());
-        let nodeName = path.basename(fullPath);  // 节点名称
-        if (parent) {
-            graphText += `    ${parent} --> ${nodeName}\n`;  // 连接父节点到当前节点
-        }
+    // 先添加目录，后添加文件
+    directories = directories.concat(tmpFiles);
 
+    // 生成Markdown格式的文本
+    directories.forEach(item => {
+        let fullPath = path.join(trgPath, item);
+        // 根据深度添加缩进，每一层多两个空格
+        let prefix = '  '.repeat(deps * 2) + '- ';
+        markdownText += `${prefix}${item}\n`;
         if (fs.statSync(fullPath).isDirectory()) {
-            graphText += entryGraph(fullPath, deps + 1, nodeName);
+            markdownText += entryMarkdown(fullPath, deps + 1);
         }
     });
 
-    return graphText;
+    return markdownText;
 }
 
 class OutputElements {
