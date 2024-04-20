@@ -9,15 +9,24 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [ "onCommand:extension.generateMap"],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
-      {
-        "command": "file-mind-map-generator.helloWorld",
-        "title": "Hello World"
-      }
-    ]
+        {
+            "command": "extension.generateMap",
+            "title": "Generate to Map"
+        }
+    ],
+    "menus": {
+        "explorer/context": [
+            {
+                "when": "explorerResourceIsFolder",
+                "command": "extension.generateMap",
+                "group": "cmdGroup@1"
+            }
+        ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
