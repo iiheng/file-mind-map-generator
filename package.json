@@ -1,7 +1,7 @@
 {
   "name": "file-mind-map-generator",
   "displayName": "file mind map generator",
-  "description": "",
+  "description": "将文件结构转为markdown形式，支持保存到本地，可以使用Markmap插件查看",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.88.0"
@@ -9,6 +9,7 @@
   "categories": [
     "Other"
   ],
+  "icon": "image/logo.png",
   "activationEvents": [ "onCommand:extension.generateMap"],
   "main": "./out/extension.js",
   "contributes": {

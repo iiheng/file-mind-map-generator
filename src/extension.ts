@@ -20,20 +20,27 @@ export function activate(context: vscode.ExtensionContext) {
 		let htmlContent = OutputElements.Template.replace('--TREE--', tree).replace('--GRAPH--', graph);
 		tree_col.webview.html = htmlContent;
 		tree_col.webview.onDidReceiveMessage(
-			message => {
-				// vscode.window.showErrorMessage('Failed to save MindMap.md: ' + message);
-				if (message.command === 'saveMindMap') {
-					const fsPath = vscode.Uri.joinPath(context.extensionUri, 'MindMap.md');
-					vscode.workspace.fs.writeFile(fsPath, Buffer.from(message.text, 'utf8')).then(() => {
-						vscode.window.showInformationMessage('MindMap.md has been saved successfully!');
-					}, err => {
-						vscode.window.showErrorMessage('Failed to save MindMap.md: ' + err.message);
-					});
-				}
-			},
-			undefined,
-			context.subscriptions
-		);
+            message => {
+                if (message.command === 'saveMindMap') {
+                    // 使用 workspaceFolders 获取当前工作区的根目录
+                    if (vscode.workspace.workspaceFolders) {
+                        const rootPath = vscode.workspace.workspaceFolders[0].uri;
+                        const fsPath = vscode.Uri.joinPath(rootPath, 'MindMap.md'); // 保存到项目根目录
+        
+                        vscode.workspace.fs.writeFile(fsPath, Buffer.from(message.text, 'utf8')).then(() => {
+                            vscode.window.showInformationMessage('MindMap.md has been saved successfully!');
+                        }, err => {
+                            vscode.window.showErrorMessage('Failed to save MindMap.md: ' + err.message);
+                        });
+                    } else {
+                        vscode.window.showErrorMessage('No workspace is open.');
+                    }
+                }
+            },
+            undefined,
+            context.subscriptions
+        );
+        
     });
 
     context.subscriptions.push(disposable);
